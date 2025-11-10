@@ -3,7 +3,7 @@ package com.example.projectprm.data.repository
 import com.example.projectprm.data.api.OrderApi
 import com.example.projectprm.data.api.dto.CreateOrderRequest
 import com.example.projectprm.data.api.dto.OrderDto
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

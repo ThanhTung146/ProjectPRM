@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.projectprm.ui.components.PrimaryButton
 import com.example.projectprm.ui.viewmodel.CheckoutViewModel
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

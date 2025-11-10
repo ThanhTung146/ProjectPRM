@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.projectprm.data.api.dto.OrderDto
 import com.example.projectprm.ui.viewmodel.OrdersViewModel
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 import java.text.SimpleDateFormat
 import java.util.Locale
 

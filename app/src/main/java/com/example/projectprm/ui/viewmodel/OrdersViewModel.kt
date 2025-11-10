@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projectprm.data.api.dto.OrderDto
 import com.example.projectprm.data.repository.OrderRepository
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 import com.example.projectprm.util.orderApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

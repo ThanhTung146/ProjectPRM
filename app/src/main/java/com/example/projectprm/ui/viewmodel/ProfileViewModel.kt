@@ -3,7 +3,7 @@ package com.example.projectprm.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.projectprm.data.TokenManager
+import com.example.projectprm.data.local.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,18 +34,19 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
      */
     private fun loadUserInfo() {
         viewModelScope.launch {
-            val userId = tokenManager.getUserId()
-            val email = tokenManager.getEmail()
-            val fullName = tokenManager.getFullName()
-            val role = tokenManager.getRole()
-            
-            if (userId != null && email != null) {
-                _userInfo.value = UserInfo(
-                    userId = userId,
-                    email = email,
-                    fullName = fullName ?: "User",
-                    role = role ?: "CUSTOMER"
-                )
+            tokenManager.getUserId().collect { userId ->
+                tokenManager.getUserEmail().collect { email ->
+                    tokenManager.getUserName().collect { fullName ->
+                        if (userId != null && email != null) {
+                            _userInfo.value = UserInfo(
+                                userId = userId.toIntOrNull() ?: 0,
+                                email = email,
+                                fullName = fullName ?: "User",
+                                role = "CUSTOMER"
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -58,7 +59,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             try {
                 _logoutState.value = LogoutState.Loading
                 // Clear all user data from TokenManager
-                tokenManager.clearToken()
+                tokenManager.clearAll()
                 _logoutState.value = LogoutState.Success
             } catch (e: Exception) {
                 _logoutState.value = LogoutState.Error(e.localizedMessage ?: "Logout failed")

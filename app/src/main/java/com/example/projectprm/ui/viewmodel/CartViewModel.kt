@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projectprm.data.api.dto.CartItemDto
 import com.example.projectprm.data.repository.CartRepository
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 import com.example.projectprm.util.cartApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

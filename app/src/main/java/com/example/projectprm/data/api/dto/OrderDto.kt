@@ -1,5 +1,6 @@
 package com.example.projectprm.data.api.dto
 
+import com.example.projectprm.data.model.Book
 import com.google.gson.annotations.SerializedName
 
 /**

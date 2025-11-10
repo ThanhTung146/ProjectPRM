@@ -154,7 +154,7 @@ fun HomeScreen(
                     }
                 }
                 is Resource.Success -> {
-                    val books = (booksState as Resource.Success).data
+                    val books = (booksState as Resource.Success).data ?: emptyList()
                     
                     if (books.isEmpty()) {
                         Box(

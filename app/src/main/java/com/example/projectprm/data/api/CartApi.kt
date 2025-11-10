@@ -1,12 +1,15 @@
 package com.example.projectprm.data.api
 
+import com.example.projectprm.data.api.dto.AddToCartRequest
 import com.example.projectprm.data.api.dto.ApiResponse
+import com.example.projectprm.data.api.dto.CartItemDto
+import com.example.projectprm.data.api.dto.UpdateCartItemRequest
 import retrofit2.Response
 import retrofit2.http.*
 
 interface CartApi {
     @GET("api/cart")
-    suspend fun getCartItems(): Response<List<CartItemDto>>
+    suspend fun getCart(): Response<List<CartItemDto>>
     
     @POST("api/cart")
     suspend fun addToCart(@Body request: AddToCartRequest): Response<ApiResponse<CartItemDto>>
@@ -14,32 +17,12 @@ interface CartApi {
     @PUT("api/cart/{id}")
     suspend fun updateCartItem(
         @Path("id") id: Int,
-        @Body request: UpdateCartRequest
-    ): Response<ApiResponse<CartItemDto>>
+        @Body request: UpdateCartItemRequest
+    ): Response<CartItemDto>
     
     @DELETE("api/cart/{id}")
-    suspend fun removeFromCart(@Path("id") id: Int): Response<ApiResponse<Unit>>
+    suspend fun deleteCartItem(@Path("id") id: Int): Response<ApiResponse<Unit>>
+    
+    @DELETE("api/cart")
+    suspend fun clearCart(): Response<ApiResponse<Unit>>
 }
-
-data class CartItemDto(
-    val id: Int,
-    val book: BookDto,
-    val quantity: Int
-)
-
-data class BookDto(
-    val id: Int,
-    val title: String,
-    val author: String,
-    val price: Double,
-    val coverImage: String?
-)
-
-data class AddToCartRequest(
-    val bookId: Int,
-    val quantity: Int
-)
-
-data class UpdateCartRequest(
-    val quantity: Int
-)

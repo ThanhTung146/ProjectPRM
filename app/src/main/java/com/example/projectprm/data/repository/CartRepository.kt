@@ -4,7 +4,7 @@ import com.example.projectprm.data.api.CartApi
 import com.example.projectprm.data.api.dto.AddToCartRequest
 import com.example.projectprm.data.api.dto.CartItemDto
 import com.example.projectprm.data.api.dto.UpdateCartItemRequest
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

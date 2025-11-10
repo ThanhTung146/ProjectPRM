@@ -106,26 +106,36 @@ fun BookDetailScreen(
             is Resource.Success -> {
                 val book = (bookState as Resource.Success).data
                 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    // Book Cover
-                    AsyncImage(
-                        model = book.coverImageUrl,
-                        contentDescription = book.title,
+                if (book == null) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                            .padding(24.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                    
-                    Column(
-                        modifier = Modifier.padding(24.dp)
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
                     ) {
+                        Text("Book not found")
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // Book Cover
+                        AsyncImage(
+                            model = book.coverImageUrl,
+                            contentDescription = book.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .padding(24.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                        
+                        Column(
+                            modifier = Modifier.padding(24.dp)
+                        ) {
                         // Title
                         Text(
                             text = book.title,
@@ -197,11 +207,11 @@ fun BookDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        book.publisher?.let { DetailRow(label = "Publisher", value = it) }
-                        book.publishYear?.let { DetailRow(label = "Year", value = it.toString()) }
-                        book.pageCount?.let { DetailRow(label = "Pages", value = it.toString()) }
-                        book.language?.let { DetailRow(label = "Language", value = it) }
-                        book.isbn?.let { DetailRow(label = "ISBN", value = it) }
+                        DetailRow(label = "Publisher", value = book.publisher)
+                        DetailRow(label = "Year", value = book.publicationYear.toString())
+                        DetailRow(label = "Pages", value = book.pages.toString())
+                        DetailRow(label = "Language", value = book.language)
+                        DetailRow(label = "ISBN", value = book.isbn)
                         
                         Spacer(modifier = Modifier.height(24.dp))
                         
@@ -221,32 +231,6 @@ fun BookDetailScreen(
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
-                
-                // Quantity Selector
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Quantity",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { if (quantity > 1) quantity-- }
-                        ) {
-                            Icon(Icons.Default.Remove, contentDescription = "Decrease")
-                        }
-                        
-                        Text(
-                            text = quantity.toString(),
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
                         
                         // Quantity Selector
                         Row(
@@ -296,6 +280,7 @@ fun BookDetailScreen(
                         
                         Spacer(modifier = Modifier.height(16.dp))
                     }
+                    }
                 }
             }
         }
@@ -303,7 +288,7 @@ fun BookDetailScreen(
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
+fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -21,7 +21,7 @@ import coil.compose.AsyncImage
 import com.example.projectprm.data.api.dto.CartItemDto
 import com.example.projectprm.ui.components.PrimaryButton
 import com.example.projectprm.ui.viewmodel.CartViewModel
-import com.example.projectprm.util.Resource
+import com.example.projectprm.data.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -280,7 +280,6 @@ fun CartScreen(
                                 PrimaryButton(
                                     text = "Proceed to Checkout",
                                     onClick = onCheckoutClick
-                                )
                                 )
                             }
                         }
