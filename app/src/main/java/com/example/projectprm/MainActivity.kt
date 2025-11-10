@@ -38,31 +38,26 @@ fun BookStoreApp() {
         // Authentication
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginClick = { email, password ->
-                    // TODO: Implement login logic
+                onLoginSuccess = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onRegisterClick = {
+                onNavigateToRegister = {
                     navController.navigate(Screen.Register.route)
-                },
-                onForgotPasswordClick = {
-                    // TODO: Implement forgot password
                 }
             )
         }
         
         composable(Screen.Register.route) {
             RegisterScreen(
-                onBackClick = {
-                    navController.navigateUp()
-                },
-                onRegisterClick = { name, email, phone, address, password ->
-                    // TODO: Implement register logic
+                onRegisterSuccess = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                },
+                onNavigateToLogin = {
+                    navController.navigateUp()
                 }
             )
         }

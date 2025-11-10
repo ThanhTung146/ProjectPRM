@@ -1,28 +1,58 @@
 package com.example.projectprm.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.projectprm.data.util.Resource
 import com.example.projectprm.ui.components.PrimaryButton
+import com.example.projectprm.ui.viewmodel.RegisterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onBackClick: () -> Unit,
-    onRegisterClick: (String, String, String, String, String) -> Unit
+    onRegisterSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val registerState by viewModel.registerState.collectAsState()
+    
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is Resource.Success -> {
+                Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
+                viewModel.resetState()
+                onRegisterSuccess()
+            }
+            is Resource.Error -> {
+                Toast.makeText(context, (registerState as Resource.Error).message, Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> {}
+        }
+    }
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -37,8 +67,8 @@ fun RegisterScreen(
             TopAppBar(
                 title = { Text("Create Account") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onNavigateToLogin) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -71,7 +101,7 @@ fun RegisterScreen(
                 value = fullName,
                 onValueChange = { fullName = it },
                 label = { Text("Full Name") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -83,7 +113,7 @@ fun RegisterScreen(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -96,7 +126,7 @@ fun RegisterScreen(
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
                 label = { Text("Phone Number") },
-                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -109,7 +139,7 @@ fun RegisterScreen(
                 value = address,
                 onValueChange = { address = it },
                 label = { Text("Address (Optional)") },
-                leadingIcon = { Icon(Icons.Default.Home, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Home, contentDescription = null) },
                 singleLine = false,
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth()
@@ -122,11 +152,11 @@ fun RegisterScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                             contentDescription = null
                         )
                     }
@@ -144,11 +174,11 @@ fun RegisterScreen(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirm Password") },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
-                            if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                             contentDescription = null
                         )
                     }
@@ -173,14 +203,25 @@ fun RegisterScreen(
             
             // Register Button
             PrimaryButton(
-                text = "Create Account",
+                text = if (registerState is Resource.Loading) "Registering..." else "Create Account",
                 onClick = {
-                    onRegisterClick(fullName, email, phoneNumber, address, password)
+                    if (fullName.isNotBlank() && 
+                        email.isNotBlank() && 
+                        phoneNumber.isNotBlank() &&
+                        address.isNotBlank() &&
+                        password.isNotBlank() && 
+                        password == confirmPassword) {
+                        viewModel.register(fullName, email, password, phoneNumber, address)
+                    }
                 },
                 enabled = fullName.isNotBlank() && 
                          email.isNotBlank() && 
+                         phoneNumber.isNotBlank() &&
+                         address.isNotBlank() &&
                          password.isNotBlank() && 
-                         password == confirmPassword
+                         password == confirmPassword &&
+                         registerState !is Resource.Loading,
+                modifier = Modifier.fillMaxWidth()
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -194,7 +235,7 @@ fun RegisterScreen(
                     text = "Already have an account?",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                TextButton(onClick = onBackClick) {
+                TextButton(onClick = onNavigateToLogin) {
                     Text("Login")
                 }
             }
