@@ -1,5 +1,6 @@
 package com.example.projectprm.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -8,11 +9,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.projectprm.data.model.Book
+import com.example.projectprm.data.util.Resource
 import com.example.projectprm.ui.components.BookCard
+import com.example.projectprm.ui.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,63 +27,14 @@ fun HomeScreen(
     onCartClick: () -> Unit,
     onOrdersClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    viewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
     
-    // Sample books data
-    val sampleBooks = remember {
-        listOf(
-            Book(
-                bookId = 1,
-                title = "The Great Gatsby",
-                author = "F. Scott Fitzgerald",
-                price = 150000.0,
-                averageRating = 4.5,
-                categoryName = "Fiction"
-            ),
-            Book(
-                bookId = 2,
-                title = "To Kill a Mockingbird",
-                author = "Harper Lee",
-                price = 180000.0,
-                averageRating = 4.8,
-                categoryName = "Fiction"
-            ),
-            Book(
-                bookId = 3,
-                title = "1984",
-                author = "George Orwell",
-                price = 160000.0,
-                averageRating = 4.6,
-                categoryName = "Fiction"
-            ),
-            Book(
-                bookId = 4,
-                title = "Sapiens",
-                author = "Yuval Noah Harari",
-                price = 250000.0,
-                averageRating = 4.7,
-                categoryName = "Non-Fiction"
-            ),
-            Book(
-                bookId = 5,
-                title = "Clean Code",
-                author = "Robert C. Martin",
-                price = 350000.0,
-                averageRating = 4.9,
-                categoryName = "Technology"
-            ),
-            Book(
-                bookId = 6,
-                title = "Atomic Habits",
-                author = "James Clear",
-                price = 200000.0,
-                averageRating = 4.8,
-                categoryName = "Self-Help"
-            )
-        )
-    }
+    val booksState by viewModel.booksState.collectAsState()
+    val categoriesState by viewModel.categoriesState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -169,17 +126,58 @@ fun HomeScreen(
                 }
             }
             
-            // Books Grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(sampleBooks) { book ->
-                    BookCard(
-                        book = book,
-                        onClick = { onBookClick(book.bookId) }
-                    )
+            // Content based on state
+            when (booksState) {
+                is Resource.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is Resource.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = (booksState as Resource.Error).message ?: "Error loading books",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.loadBooks() }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                is Resource.Success -> {
+                    val books = (booksState as Resource.Success).data
+                    
+                    if (books.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No books found")
+                        }
+                    } else {
+                        // Books Grid
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(books) { book ->
+                                BookCard(
+                                    book = book,
+                                    onClick = { onBookClick(book.bookId) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
