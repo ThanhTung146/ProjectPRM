@@ -155,17 +155,11 @@ fun BookStoreApp() {
         
         composable(Screen.Profile.route) {
             ProfileScreen(
-                onEditProfileClick = {
-                    // TODO: Implement edit profile
-                },
                 onMyOrdersClick = {
                     navController.navigate(Screen.Orders.route)
                 },
-                onSettingsClick = {
-                    // TODO: Implement settings
-                },
-                onLogoutClick = {
-                    // TODO: Implement logout logic
+                onLogoutSuccess = {
+                    // Navigate to Login screen and clear back stack
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }

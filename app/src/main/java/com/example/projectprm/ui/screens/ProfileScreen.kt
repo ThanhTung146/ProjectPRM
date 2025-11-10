@@ -1,5 +1,6 @@
 package com.example.projectprm.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,17 +10,68 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.projectprm.ui.viewmodel.LogoutState
+import com.example.projectprm.ui.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onEditProfileClick: () -> Unit,
     onMyOrdersClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutSuccess: () -> Unit,
+    viewModel: ProfileViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val userInfo by viewModel.userInfo.collectAsState()
+    val logoutState by viewModel.logoutState.collectAsState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    
+    // Handle logout state
+    LaunchedEffect(logoutState) {
+        when (logoutState) {
+            is LogoutState.Success -> {
+                Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                viewModel.resetLogoutState()
+                onLogoutSuccess()
+            }
+            is LogoutState.Error -> {
+                Toast.makeText(
+                    context,
+                    (logoutState as LogoutState.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.resetLogoutState()
+            }
+            else -> {}
+        }
+    }
+    
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Logout") },
+            text = { Text("Are you sure you want to logout?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.logout()
+                        showLogoutDialog = false
+                    }
+                ) {
+                    Text("Logout")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,24 +107,26 @@ fun ProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "John Doe",
+                        text = userInfo?.fullName ?: "User",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "john.doe@example.com",
+                        text = userInfo?.email ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = onEditProfileClick,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Edit Profile")
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AssistChip(
+                        onClick = { },
+                        label = { Text(userInfo?.role ?: "CUSTOMER") },
+                        leadingIcon = {
+                            Icon(
+                                if (userInfo?.role == "ADMIN") Icons.Default.Star else Icons.Default.Person,
+                                contentDescription = null
+                            )
+                        }
+                    )
                 }
             }
             
@@ -97,14 +151,14 @@ fun ProfileScreen(
                 icon = Icons.Default.LocationOn,
                 title = "Addresses",
                 subtitle = "Manage delivery addresses",
-                onClick = { }
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             ProfileMenuItem(
                 icon = Icons.Default.Payment,
                 title = "Payment Methods",
                 subtitle = "Manage payment options",
-                onClick = { }
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -121,21 +175,14 @@ fun ProfileScreen(
                 icon = Icons.Default.Notifications,
                 title = "Notifications",
                 subtitle = "Manage notification settings",
-                onClick = { }
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             ProfileMenuItem(
                 icon = Icons.Default.Language,
                 title = "Language",
                 subtitle = "English",
-                onClick = { }
-            )
-            
-            ProfileMenuItem(
-                icon = Icons.Default.Settings,
-                title = "Settings",
-                subtitle = "App settings and preferences",
-                onClick = onSettingsClick
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -152,29 +199,30 @@ fun ProfileScreen(
                 icon = Icons.Default.Help,
                 title = "Help Center",
                 subtitle = "Get help and support",
-                onClick = { }
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             ProfileMenuItem(
                 icon = Icons.Default.Info,
                 title = "About",
-                subtitle = "Version 1.0.0",
-                onClick = { }
+                subtitle = "Books Selling App v1.0.0",
+                onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
             )
             
             Spacer(modifier = Modifier.height(24.dp))
             
             // Logout Button
             Button(
-                onClick = onLogoutClick,
+                onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
-                )
+                ),
+                enabled = logoutState !is LogoutState.Loading
             ) {
                 Icon(Icons.Default.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Logout")
+                Text(if (logoutState is LogoutState.Loading) "Logging out..." else "Logout")
             }
             
             Spacer(modifier = Modifier.height(16.dp))
