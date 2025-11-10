@@ -116,8 +116,8 @@ fun BookStoreApp() {
                 onBackClick = {
                     navController.navigateUp()
                 },
-                onPlaceOrderClick = {
-                    // TODO: Implement place order logic
+                onOrderPlaced = { orderId ->
+                    // Navigate to Orders screen after successful order
                     navController.navigate(Screen.Orders.route) {
                         popUpTo(Screen.Home.route)
                     }
